@@ -1,6 +1,7 @@
-package com.mezzsy.copyzhihunews;
+package com.mezzsy.copyzhihunews.ui;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -21,6 +22,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.mezzsy.copyzhihunews.R;
 import com.mezzsy.copyzhihunews.adapter.RecyclerViewAdapter;
 import com.mezzsy.copyzhihunews.event.LoginEvent;
 import com.mezzsy.copyzhihunews.presenter.Presenter;
@@ -36,7 +38,8 @@ import org.greenrobot.eventbus.ThreadMode;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MainActivity extends AppCompatActivity implements
-        NavigationView.OnNavigationItemSelectedListener, IView, SwipeRefreshLayout.OnRefreshListener {
+        NavigationView.OnNavigationItemSelectedListener, IView, SwipeRefreshLayout.OnRefreshListener,
+        RecyclerViewAdapter.OnItemClickListenter {
     private static final String TAG = "MainActivity";
     private static final int WHAT_SUCCESS = 0;
     private static final int WHAT_FAIL = 1;
@@ -50,6 +53,7 @@ public class MainActivity extends AppCompatActivity implements
     private TextView tvName;
     private Presenter presenter;
     private SwipeRefreshLayout swipeRefreshLayout;
+    private TextView tvTitle;
 
     private Handler handler = new Handler(new Handler.Callback() {
         @Override
@@ -57,6 +61,7 @@ public class MainActivity extends AppCompatActivity implements
             switch (msg.what) {
                 case WHAT_SUCCESS:
                     adapter.notifyDataSetChanged();
+                    adapter.updateBanner();
                     break;
                 case WHAT_FAIL:
                     Toast.makeText(MainActivity.this
@@ -108,9 +113,11 @@ public class MainActivity extends AppCompatActivity implements
         swipeRefreshLayout.setColorSchemeColors(R.color.colorPrimary);
 
         toolbar = findViewById(R.id.tool_bar);
+        tvTitle = findViewById(R.id.tv_title);
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
+            actionBar.setDisplayShowTitleEnabled(false);
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
         }
@@ -124,6 +131,7 @@ public class MainActivity extends AppCompatActivity implements
 
         recyclerView = findViewById(R.id.recycler_view);
         adapter = new RecyclerViewAdapter();
+        adapter.setListenter(this);
         recyclerView.setAdapter(adapter);
         LinearLayoutManager manager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(manager);
@@ -132,6 +140,11 @@ public class MainActivity extends AppCompatActivity implements
             @Override
             public void onLoadMore() {
                 presenter.loadMore();
+            }
+
+            @Override
+            public void setTitle(String title) {
+                tvTitle.setText(title);
             }
         });
     }
@@ -181,5 +194,12 @@ public class MainActivity extends AppCompatActivity implements
     public void onRefresh() {
         swipeRefreshLayout.setRefreshing(true);
         presenter.swipeRefresh();
+    }
+
+    @Override
+    public void click(int id) {
+        Intent intent = new Intent(this, NewsActivity.class);
+        intent.putExtra("id", id);
+        startActivity(intent);
     }
 }

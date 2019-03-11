@@ -1,70 +1,33 @@
 package com.mezzsy.copyzhihunews.bean;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.util.List;
 
+/**
+ * 非Top新闻的数据类
+ *
+ * RecyclerViewAdapter中的TYPE_TITLE和TYPE_ITEM类型，TYPE_TITLE为日期标题，TYPE_ITEM为新闻。
+ * 在List中的存放顺序：最新的StoriesBean的index越小，并且以isTitle进行区分是否是日期标题。
+ */
 public class StoriesBean {
-    /**
-     * images : ["https://pic3.zhimg.com/v2-1ede46bf79de14bb002243221e6c7156.jpg"]
-     * type : 0
-     * id : 9698851
-     * ga_prefix : 101913
-     * title : 中老年表情包，我跟父母聊天的快乐源泉
+    /*
+    date : 日期
+    stories : 当日新闻
+        title : 新闻标题
+        images : 图像地址（官方 API 使用数组形式。目前暂未有使用多张图片的情形出现，曾见无 images 属性的情况，请在使用中注意 ）
+        ga_prefix : 供 Google Analytics 使用
+        type : 作用未知
+        id : url 与 share_url 中最后的数字（应为内容的 id）
+        multipic : 消息是否包含多张图片（仅出现在包含多图的新闻中）
+    top_stories : 界面顶部 ViewPager 滚动显示的显示内容（子项格式同上）
      */
 
-    private int type;
-    private int id;
-    private String ga_prefix;
-    private String title;
-    private List<String> images;
-
-    public int getType() {
-        return type;
-    }
-
-    public void setType(int type) {
-        this.type = type;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getGa_prefix() {
-        return ga_prefix;
-    }
-
-    public void setGa_prefix(String ga_prefix) {
-        this.ga_prefix = ga_prefix;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public List<String> getImages() {
-        return images;
-    }
-
-    public void setImages(List<String> images) {
-        this.images = images;
-    }
-
-    @Override
-    public String toString() {
-        return "StoriesBean{" +
-                "type=" + type +
-                ", id=" + id +
-                ", ga_prefix='" + ga_prefix + '\'' +
-                ", title='" + title + '\'' +
-                ", images=" + images +
-                '}';
-    }
+    public String date;
+    public boolean isTitle;//是否是标题日期，如果是，除date属性外其余为默认值。
+    public int id;
+    public String title;
+    public List<String> images;
+    @SerializedName("ga_prefix")
+    public int serialNumber;
 }

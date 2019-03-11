@@ -1,24 +1,21 @@
 package com.mezzsy.copyzhihunews.presenter;
 
-import android.util.Log;
-
 import com.google.gson.Gson;
-import com.mezzsy.copyzhihunews.bean.Bean;
-import com.mezzsy.copyzhihunews.bean.Date;
+import com.mezzsy.copyzhihunews.bean.BaseBean;
 import com.mezzsy.copyzhihunews.bean.StoriesBean;
 import com.mezzsy.copyzhihunews.bean.TopStoriesBean;
 import com.mezzsy.copyzhihunews.model.Model;
-import com.mezzsy.copyzhihunews.util.HttpUtil;
+import com.mezzsy.copyzhihunews.network.NetWorkManager;
+import com.mezzsy.copyzhihunews.util.DateHelper;
 import com.mezzsy.copyzhihunews.util.Util;
 import com.mezzsy.copyzhihunews.view.IView;
 
 import java.io.IOException;
 import java.util.List;
 
+import io.reactivex.Observer;
+import io.reactivex.disposables.Disposable;
 import okhttp3.ResponseBody;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class Presenter {
     //    public static final int TYPE_LOADMORE = 0;
@@ -26,115 +23,156 @@ public class Presenter {
     private static final String TAG = "Presenter";
     private IView view;
     private Model model;
-    private List<Date> dates;
-    private List<StoriesBean> latestStoriesBeans;
-    private List<StoriesBean> storiesBeans;
-    private List<TopStoriesBean> topStoriesBeans;
+    //    private final List<Date> dates;
+    //    private final List<StoriesBean> latestStoriesBeans;
+    private final List<StoriesBean> storiesBeans;
+    private final List<TopStoriesBean> topStoriesBeans;
+    private final List<String> headerImages;
+    private final List<String> headerTitles;
     private String currentDate;
 
     public Presenter(IView view) {
         this.view = view;
         model = Model.getInstance();
-        latestStoriesBeans = model.getLatestStoriesBeans();
-        storiesBeans = model.getBeans();
-        dates = model.getDate();
+        storiesBeans = model.getStoriesBeans();
+//        dates = model.getDate();
+        topStoriesBeans = model.getTopStoriesBeans();
+        headerImages = model.getHeaderImages();
+        headerTitles = model.getHeaderTitles();
+        currentDate = "";
     }
 
     public void loadMore(){
-        currentDate=dates.get(dates.size()-1).getOriginalDate();
-        Log.d(TAG, "loadMore: currentDate = "+currentDate);
-        HttpUtil.loadMore(currentDate,new Callback<ResponseBody>() {
+        currentDate = DateHelper.getSpecifiedDayBefore(currentDate);
+        NetWorkManager.getInstance().loadMore(currentDate, new Observer<ResponseBody>() {
+            Disposable d;
+            boolean isSuccess;
+
             @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            public void onSubscribe(Disposable d) {
+                this.d = d;
+            }
+
+            @Override
+            public void onNext(ResponseBody response) {
                 String responseData = null;
                 try {
-                    responseData = response.body().string();
+                    responseData = response.string();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
                 Gson gson = new Gson();
-                Bean bean = gson.fromJson(responseData, Bean.class);
-                storiesBeans.add(null);
-                storiesBeans.addAll(bean.getStories());
-                dates.add(new Date(bean.getDate()));
-                view.load(true);
+                BaseBean bean = gson.fromJson(responseData, BaseBean.class);
+
+                //更新数据
+                StoriesBean titleStoriesBean = new StoriesBean();
+                titleStoriesBean.isTitle = true;
+                titleStoriesBean.date = bean.date;
+                storiesBeans.add(titleStoriesBean);
+                storiesBeans.addAll(bean.stories);
+
+                isSuccess = true;
             }
 
             @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                t.printStackTrace();
-                view.load(false);
+            public void onError(Throwable e) {
+                e.printStackTrace();
+                isSuccess = false;
+            }
+
+            @Override
+            public void onComplete() {
+                view.load(isSuccess);
             }
         });
     }
 
+    /**
+     * 下拉刷新
+     */
     public void swipeRefresh() {
-        HttpUtil.swipeRefresh(new retrofit2.Callback<ResponseBody>() {
+        NetWorkManager.getInstance().swipeRefresh(new Observer<ResponseBody>() {
+            Disposable d;
+            boolean isSuccess = true;
+
             @Override
-            public void onResponse(retrofit2.Call<ResponseBody> call, retrofit2.Response<ResponseBody> response) {
+            public void onSubscribe(Disposable d) {
+                this.d = d;
+            }
+
+            /**
+             * 更新数据
+             *
+             * @param response
+             */
+            @Override
+            public void onNext(ResponseBody response) {
                 String responseData = null;
                 try {
-                    responseData = response.body().string();
+                    responseData = response.string();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
                 Gson gson = new Gson();
-                Bean bean = gson.fromJson(responseData, Bean.class);
-                if (latestStoriesBeans.size() - 1 != bean.getStories().size()) {
-                    if (latestStoriesBeans.size() == 0) {
-                        latestStoriesBeans.add(null);
-                        latestStoriesBeans.addAll(bean.getStories());
-                        currentDate=bean.getDate();
-                        dates.add(new Date(bean.getDate()));
-                        storiesBeans.addAll(0,latestStoriesBeans);
-                    } else {
-                        int p=1;
-                        for (StoriesBean storiesBean:bean.getStories()){
-                            if (!contain(storiesBean.getId())){
-                                latestStoriesBeans.add(p,storiesBean);
-                                storiesBeans.add(p,storiesBean);
-                                p++;
-                            }
+                BaseBean bean = gson.fromJson(responseData, BaseBean.class);
+
+                if (Util.isEmpty(currentDate))
+                    currentDate = bean.date;//获取当前日期
+
+                //顶部轮播图数据更新
+                topStoriesBeans.clear();
+                topStoriesBeans.addAll(bean.topStories);
+                headerTitles.clear();
+                headerImages.clear();
+                for (TopStoriesBean topStoriesBean : topStoriesBeans) {
+                    headerImages.add(topStoriesBean.image);
+                    headerTitles.add(topStoriesBean.title);
+                }
+
+                List<StoriesBean> lastestStoriesBeans = bean.stories;
+                //添加最新数据
+                if (storiesBeans.size() == 0) {
+                    StoriesBean titleStoriesBean = new StoriesBean();
+                    titleStoriesBean.date = bean.date;
+                    titleStoriesBean.isTitle = true;
+                    storiesBeans.add(titleStoriesBean);
+                    storiesBeans.addAll(lastestStoriesBeans);
+                } else {
+                    int currentLastestNumber = storiesBeans.get(1).serialNumber;
+                    for (int i = lastestStoriesBeans.size() - 1; i >= 0; i--) {
+                        StoriesBean storiesBean = lastestStoriesBeans.get(i);
+                        int n = storiesBean.serialNumber;
+                        if (n > currentLastestNumber) {
+                            storiesBean.date = bean.date;
+                            storiesBeans.add(1, storiesBean);
                         }
                     }
-                    topStoriesBeans = bean.getTop_stories();
                 }
-                view.load(true);
+                isSuccess = true;
             }
 
             @Override
-            public void onFailure(retrofit2.Call<ResponseBody> call, Throwable t) {
-                t.printStackTrace();
-                view.load(false);
+            public void onError(Throwable e) {
+                e.printStackTrace();
+                d.dispose();
+                isSuccess = false;
+            }
+
+            /**
+             * 回调
+             */
+            @Override
+            public void onComplete() {
+                view.load(isSuccess);
             }
         });
-//        HttpUtil.sendHttpRequest("http://news-at.zhihu.com/api/4/news/latest", new Callback() {
-//            @Override
-//            public void onFailure(Call call, IOException e) {
-//                e.printStackTrace();
-//                view.load(type, false);
-//            }
-//
-//            @Override
-//            public void onResponse(Call call, Response response) throws IOException {
-//                String responseData = response.body().string();
-//                Gson gson = new Gson();
-//                Bean bean = gson.fromJson(responseData, Bean.class);
-//                storiesBeans.add(null);
-//                storiesBeans.addAll(bean.getStories());
-//                date.add(new Date(bean.getDate()));
-//                topStoriesBeans = bean.getTop_stories();
-////                Log.d(TAG, "onResponse: " + bean.toString());
-//                view.load(type, true);
-//            }
-//        });
     }
 
-    private boolean contain(int id){
-        for (StoriesBean bean:latestStoriesBeans){
-            if (bean==null)continue;
-            if (id==bean.getId())return true;
-        }
-        return false;
-    }
+//    private boolean contain(int id){
+//        for (StoriesBean bean:latestStoriesBeans){
+//            if (bean==null)continue;
+//            if (id==bean.getId())return true;
+//        }
+//        return false;
+//    }
 }
