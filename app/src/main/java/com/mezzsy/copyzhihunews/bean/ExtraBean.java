@@ -1,5 +1,8 @@
 package com.mezzsy.copyzhihunews.bean;
 
+/**
+ * 输入新闻的ID，获取对应新闻的额外信息，如评论数量，所获的『赞』的数量。
+ */
 public class ExtraBean {
 
     /**

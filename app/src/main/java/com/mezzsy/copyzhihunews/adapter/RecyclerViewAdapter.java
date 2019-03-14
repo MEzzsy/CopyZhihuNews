@@ -121,7 +121,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     public interface OnItemClickListenter {
         void click(int id);
-
     }
 
     private class HeaderHolder extends RecyclerView.ViewHolder {

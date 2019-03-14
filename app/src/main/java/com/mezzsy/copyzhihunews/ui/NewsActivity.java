@@ -1,5 +1,6 @@
 package com.mezzsy.copyzhihunews.ui;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -21,15 +22,17 @@ import com.mezzsy.copyzhihunews.R;
 import com.mezzsy.copyzhihunews.bean.ContentBean;
 import com.mezzsy.copyzhihunews.bean.ExtraBean;
 import com.mezzsy.copyzhihunews.presenter.ContentPresenter;
-import com.mezzsy.copyzhihunews.util.Util;
+import com.mezzsy.copyzhihunews.util.HtmlUtil;
 import com.mezzsy.copyzhihunews.util.WebViewConfigs;
 import com.mezzsy.copyzhihunews.view.ContentView;
 
-public class NewsActivity extends AppCompatActivity implements ContentView, View.OnClickListener {
-    private static final String TAG = "NewsActivity";
+public class NewsActivity extends AppCompatActivity implements
+        ContentView, View.OnClickListener {
+    private static final String TAG = "NewsActivityzzsy";
     private WebView webView;
     private ContentPresenter presenter;
-    private int id;//url的id
+
+    private int id;//新闻的id，用于获取具体内容
     private String mTitle;
 
     private Toolbar toolbar;
@@ -45,7 +48,6 @@ public class NewsActivity extends AppCompatActivity implements ContentView, View
     private TextView tvTitle;
     private TextView tvSource;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,13 +59,13 @@ public class NewsActivity extends AppCompatActivity implements ContentView, View
     @Override
     protected void onResume() {
         super.onResume();
-//        presenter.requestNewsContent(id);
-//        presenter.requestNewsExtra(id);
+        presenter.requestNewsContent(id);
+        presenter.requestNewsExtra(id);
     }
 
     private void initData() {
         id = getIntent().getIntExtra("id", 0);
-//        presenter = new ContentPresenter(this);
+        presenter = new ContentPresenter(this);
     }
 
     private void initView() {
@@ -94,14 +96,12 @@ public class NewsActivity extends AppCompatActivity implements ContentView, View
     @Override
     public void load(ContentBean bean) {
         WebViewConfigs.initWebView(webView);
+//        String html = Util.modifyHTML(bean.getBody(), bean.getCss().get(0));
+        String htmlData = HtmlUtil.createHtmlData(bean.getBody(),
+                bean.getCss(), bean.getJs());
+//        Log.d(TAG, html);
+        webView.loadData(htmlData, "text/html; charset=UTF-8", null);
 
-        String body = Util.modifyHTML(bean.getBody());
-//        String body = "<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\" />"
-//                + bean.getBody();
-//        webView.loadDataWithBaseURL("file:///android_asset/", body
-//                , "text/html", "UTF-8", null);
-        webView.loadData(body, "text/html; charset=UTF-8", null);
-//        Log.d(TAG, "load: " + bean.getBody());
         Glide.with(this).load(bean.getImage()).into(new SimpleTarget<Drawable>() {
             @Override
             public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
@@ -113,6 +113,7 @@ public class NewsActivity extends AppCompatActivity implements ContentView, View
         mTitle = bean.getTitle();
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
     public void extra(ExtraBean bean) {
         tvPl.setText(bean.getComments() + "");

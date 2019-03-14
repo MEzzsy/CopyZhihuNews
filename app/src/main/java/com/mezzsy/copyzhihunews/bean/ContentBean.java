@@ -2,6 +2,9 @@ package com.mezzsy.copyzhihunews.bean;
 
 import java.util.List;
 
+/**
+ * 新闻的具体内容
+ */
 public class ContentBean {
 
     private String body;
@@ -13,7 +16,7 @@ public class ContentBean {
     private String ga_prefix;
     private int type;
     private SectionBean section;
-    private List<?> js;
+    private List<String> js;
     private List<String> images;
     private List<String> css;
 
@@ -89,11 +92,11 @@ public class ContentBean {
         this.section = section;
     }
 
-    public List<?> getJs() {
+    public List<String> getJs() {
         return js;
     }
 
-    public void setJs(List<?> js) {
+    public void setJs(List<String> js) {
         this.js = js;
     }
 

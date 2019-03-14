@@ -1,41 +1,35 @@
 package com.mezzsy.copyzhihunews.util;
 
 public class Util {
+    private static final String TAG = "Utilzzsy";
 
-    //修改HTML格式
-    public static String modifyHTML(String body) {
-        String head = "<html><head>" +
-                "<style " +
-                "type=\"text/css\"> " +
-                "a{" +
-                "color:#526b8c;" +
-                "font-size:18px;" +
-                "word-break:break-all" +
-                "}" +
-                "body{" +
-                "padding:0 10px" +
-                "}" +
-                ".meta {" +
-                "overflow: hidden;" +
-                "text-overflow: ellipsis;" +
-                "white-space: nowrap;" +
-                "}" +
-                "</style>" +
-                "</head><body>";
-        body = body.replaceAll("<h2", "<h3");
-        body = body.replaceAll("</h2>", "</h3>");
-        body = body.replaceAll("<span class=\"bio\">"
-                , "<span class=\"bio\"style=\"color: grey;\">");
-        body = body.replaceAll("<div class=\"view-more\"><a",
-                "<div class=\"view-more\" " +
-                        "style=\"width:100% ; background: whitesmoke; text-align: center; padding-bottom: 5px;padding-top: 5px; \">" +
-                        "<a style=\"text-decoration: none; color: grey;\"");
-        body = body.replaceAll("<img class=\"content-image\"",
-                "<img class=\"content-image\" style=\"width:100%\"");
-
-        String closedTag = "</body></html>";
-        return head + body + closedTag;
-    }
+//    //修改HTML格式
+//    public static String modifyHTML(String body, String css) {
+//        String linkCss = "<link rel=\"stylesheet\" " +
+//                "href=" + css +
+//                "type=\"text/css\">";
+//        body = "<html><header>" +
+//                linkCss +
+//                "</header>" +
+//                "<body>" +
+//                body;
+//        String html = body + "</body></html>";
+////        i(TAG,html);
+//        return html;
+//    }
+//
+//    public static void i(String tag, String msg) {  //信息太长,分段打印
+//        //因为String的length是字符数量不是字节数量所以为了防止中文字符过多，
+//        //  把4*1024的MAX字节打印长度改为2001字符数
+//        int max_str_length = 2001 - tag.length();
+//        //大于4000时
+//        while (msg.length() > max_str_length) {
+//            Log.i(tag, msg.substring(0, max_str_length));
+//            msg = msg.substring(max_str_length);
+//        }
+//        //剩余部分
+//        Log.i(tag, msg);
+//    }
 
     public static boolean isEmpty(String s) {
         return s == null || s.equals("");

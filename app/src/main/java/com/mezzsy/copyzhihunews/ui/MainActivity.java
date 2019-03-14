@@ -196,6 +196,10 @@ public class MainActivity extends AppCompatActivity implements
         presenter.swipeRefresh();
     }
 
+    /**
+     * 处理RecyclerView子项点击事件
+     * @param id
+     */
     @Override
     public void click(int id) {
         Intent intent = new Intent(this, NewsActivity.class);
