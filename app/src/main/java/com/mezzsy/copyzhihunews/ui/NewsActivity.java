@@ -29,13 +29,13 @@ import com.mezzsy.copyzhihunews.view.ContentView;
 public class NewsActivity extends AppCompatActivity implements
         ContentView, View.OnClickListener {
     private static final String TAG = "NewsActivityzzsy";
-    private WebView webView;
-    private ContentPresenter presenter;
+    private WebView mWebView;
+    private ContentPresenter mPresenter;
 
     private int id;//新闻的id，用于获取具体内容
     private String mTitle;
 
-    private Toolbar toolbar;
+    private Toolbar mToolbar;
     private ImageView imgBack;
     private ImageView imgShare;
     private ImageView imgLike;
@@ -44,7 +44,7 @@ public class NewsActivity extends AppCompatActivity implements
     private ImageView imgDz;
     private TextView tvDz;
 
-    private RelativeLayout background;
+    private RelativeLayout mBackground;
     private TextView tvTitle;
     private TextView tvSource;
 
@@ -59,24 +59,24 @@ public class NewsActivity extends AppCompatActivity implements
     @Override
     protected void onResume() {
         super.onResume();
-        presenter.requestNewsContent(id);
-        presenter.requestNewsExtra(id);
+        mPresenter.requestNewsContent(id);
+        mPresenter.requestNewsExtra(id);
     }
 
     private void initData() {
         id = getIntent().getIntExtra("id", 0);
-        presenter = new ContentPresenter(this);
+        mPresenter = new ContentPresenter(this);
     }
 
     private void initView() {
-        webView = findViewById(R.id.web_view);
+        mWebView = findViewById(R.id.web_view);
 
-        background = findViewById(R.id.header_layout);
+        mBackground = findViewById(R.id.header_layout);
         tvTitle = findViewById(R.id.tv_title);
         tvSource = findViewById(R.id.tv_source);
 
-        toolbar = findViewById(R.id.tool_bar);
-        setSupportActionBar(toolbar);
+        mToolbar = findViewById(R.id.tool_bar);
+        setSupportActionBar(mToolbar);
         imgBack = findViewById(R.id.img_back);
         imgShare = findViewById(R.id.img_share);
         imgLike = findViewById(R.id.img_like);
@@ -95,17 +95,17 @@ public class NewsActivity extends AppCompatActivity implements
 
     @Override
     public void load(ContentBean bean) {
-        WebViewConfigs.initWebView(webView);
+        WebViewConfigs.initWebView(mWebView);
 //        String html = Util.modifyHTML(bean.getBody(), bean.getCss().get(0));
         String htmlData = HtmlUtil.createHtmlData(bean.getBody(),
                 bean.getCss(), bean.getJs());
 //        Log.d(TAG, html);
-        webView.loadData(htmlData, "text/html; charset=UTF-8", null);
+        mWebView.loadData(htmlData, "text/html; charset=UTF-8", null);
 
         Glide.with(this).load(bean.getImage()).into(new SimpleTarget<Drawable>() {
             @Override
             public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
-                background.setBackground(resource);
+                mBackground.setBackground(resource);
             }
         });
         tvSource.setText(bean.getImage_source());

@@ -21,6 +21,12 @@ public interface RequestService {
     @GET("news/{id}")
     Observable<ResponseBody> getNewsContent(@Path("id") int id);
 
+    /**
+     * 输入新闻的ID，获取对应新闻的额外信息，如评论数量，所获的赞的数量
+     *
+     * @param id
+     * @return
+     */
     @GET("story-extra/{id}")
     Observable<ResponseBody> getNewsExtra(@Path("id") int id);
 }

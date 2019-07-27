@@ -1,6 +1,7 @@
 package com.mezzsy.copyzhihunews.adapter;
 
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,9 +14,7 @@ import com.mezzsy.copyzhihunews.R;
 import com.mezzsy.copyzhihunews.bean.StoriesBean;
 import com.mezzsy.copyzhihunews.model.Model;
 import com.mezzsy.copyzhihunews.util.DateHelper;
-import com.youth.banner.Banner;
-import com.youth.banner.BannerConfig;
-import com.youth.banner.listener.OnBannerListener;
+import com.mezzsy.copyzhihunews.view.HeadlineBanner;
 
 import java.util.List;
 
@@ -28,19 +27,19 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     //头布局
     private final int TYPE_HEADER = 3;
 
-    private List<StoriesBean> storiesBeans;
-    private List<String> headerImages;
-    private List<String> headerTitles;
+    private List<StoriesBean> mStoriesBeans;
+    private List<String> mHeaderImages;
+    private List<String> mHeaderTitles;
 //    private List<Date> dates;
 
-    private Banner banner;
-    private OnItemClickListenter listenter;
+    private HeadlineBanner mBanner;
+    private OnItemClickListenter mListenter;
 
     public RecyclerViewAdapter() {
-        this.storiesBeans = Model.getInstance().getStoriesBeans();
+        this.mStoriesBeans = Model.getInstance().getStoriesBeans();
 //        dates = Model.getInstance().getDate();
-        headerImages = Model.getInstance().getHeaderImages();
-        headerTitles = Model.getInstance().getHeaderTitles();
+        mHeaderImages = Model.getInstance().getHeaderImages();
+        mHeaderTitles = Model.getInstance().getHeaderTitles();
     }
 
     @Override
@@ -50,9 +49,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             case TYPE_HEADER:
                 View headerView = LayoutInflater.from(parent.getContext())
                         .inflate(R.layout.recycler_view_header, parent, false);
-                banner = headerView.findViewById(R.id.banner);
-                banner.setImageLoader(new GlideImageLoader())
-                        .setBannerStyle(BannerConfig.CIRCLE_INDICATOR_TITLE);
+                mBanner = headerView.findViewById(R.id.banner);
                 return new HeaderHolder(headerView);
             case TYPE_TITLE:
                 View titleView = LayoutInflater.from(parent.getContext())
@@ -69,54 +66,53 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     @Override
     public int getItemViewType(int position) {
         if (position == 0) return TYPE_HEADER;
-        if (storiesBeans.get(position - 1).isTitle) return TYPE_TITLE;
+        if (mStoriesBeans.get(position - 1).isTitle) return TYPE_TITLE;
         return TYPE_ITEM;
     }
 
     @Override
     public int getItemCount() {
-        return storiesBeans.size() + 1;
+        return mStoriesBeans.size() + 1;
     }
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof ItemHolder) {
-            final StoriesBean storiesBean = storiesBeans.get(position - 1);
+            final StoriesBean storiesBean = mStoriesBeans.get(position - 1);
             ((ItemHolder) holder).tv.setText(storiesBean.title);
             ImageView img = ((ItemHolder) holder).img;
-            Glide.with(img).load(storiesBeans.get(position - 1).images.get(0)).into(img);
+            Glide.with(img).load(mStoriesBeans.get(position - 1).images.get(0)).into(img);
             ((ItemHolder) holder).layout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    listenter.click(storiesBean.id);
+                    mListenter.click(storiesBean.id);
                 }
             });
         } else if (holder instanceof TitleHolder) {
-            String date=storiesBeans.get(position-1).date;
-            ((TitleHolder)holder).tvTitle.setText(DateHelper.getDate(date));
+            String date = mStoriesBeans.get(position - 1).date;
+            ((TitleHolder) holder).tvTitle.setText(DateHelper.getDate(date));
         } else {
             //TODO
         }
     }
 
     public void updateBanner() {
-        banner.setImages(headerImages)
-                .setBannerTitles(headerTitles)
-                .setOnBannerListener(new OnBannerListener() {
-                    @Override
-                    public void OnBannerClick(int position) {
+        Log.d(TAG, "updateBanner: " + mHeaderImages.size());
+        mBanner.setImages(mHeaderImages)
+                .setTitles(mHeaderTitles)
+                .setOnBannerListener(position -> {
 //                        Log.d(TAG, "OnBannerClick: position = " + position);
-                        int id = Model.getInstance().getTopStoriesBeans().get(position).id;
-                        listenter.click(id);
-                    }
+                    int id = Model.getInstance().getTopStoriesBeans().get(position).id;
+                    mListenter.click(id);
                 })
+                .bulid()
                 .start();
-//        banner.update(headerImages, headerTitles);
-//        Log.d(TAG, "updateBanner: "+headerImages);
+//        mBanner.update(mHeaderImages, mHeaderTitles);
+//        Log.d(TAG, "updateBanner: "+mHeaderImages);
     }
 
-    public void setListenter(OnItemClickListenter listenter) {
-        this.listenter = listenter;
+    public void setListenter(OnItemClickListenter mListenter) {
+        this.mListenter = mListenter;
     }
 
     public interface OnItemClickListenter {

@@ -17,34 +17,37 @@ import io.reactivex.Observer;
 import io.reactivex.disposables.Disposable;
 import okhttp3.ResponseBody;
 
+/**
+ * 主界面的Presenter
+ */
 public class Presenter {
     //    public static final int TYPE_LOADMORE = 0;
 //    public static final int TYPE_SWIPE_REFRESH = 1;
     private static final String TAG = "Presenter";
-    private IView view;
-    private Model model;
+    private IView mView;
+    private Model mModel;
     //    private final List<Date> dates;
     //    private final List<StoriesBean> latestStoriesBeans;
-    private final List<StoriesBean> storiesBeans;
-    private final List<TopStoriesBean> topStoriesBeans;
-    private final List<String> headerImages;
-    private final List<String> headerTitles;
-    private String currentDate;
+    private final List<StoriesBean> mStoriesBeans;
+    private final List<TopStoriesBean> mTopStoriesBeans;
+    private final List<String> mHeaderImages;
+    private final List<String> mHeaderTitles;
+    private String mCurrentDate;
 
     public Presenter(IView view) {
-        this.view = view;
-        model = Model.getInstance();
-        storiesBeans = model.getStoriesBeans();
+        this.mView = view;
+        mModel = Model.getInstance();
+        mStoriesBeans = mModel.getStoriesBeans();
 //        dates = model.getDate();
-        topStoriesBeans = model.getTopStoriesBeans();
-        headerImages = model.getHeaderImages();
-        headerTitles = model.getHeaderTitles();
-        currentDate = "";
+        mTopStoriesBeans = mModel.getTopStoriesBeans();
+        mHeaderImages = mModel.getHeaderImages();
+        mHeaderTitles = mModel.getHeaderTitles();
+        mCurrentDate = "";
     }
 
     public void loadMore(){
-        currentDate = DateHelper.getSpecifiedDayBefore(currentDate);
-        NetWorkManager.getInstance().loadMore(currentDate, new Observer<ResponseBody>() {
+        mCurrentDate = DateHelper.getSpecifiedDayBefore(mCurrentDate);
+        NetWorkManager.getInstance().loadMore(mCurrentDate, new Observer<ResponseBody>() {
             Disposable d;
             boolean isSuccess;
 
@@ -68,8 +71,8 @@ public class Presenter {
                 StoriesBean titleStoriesBean = new StoriesBean();
                 titleStoriesBean.isTitle = true;
                 titleStoriesBean.date = bean.date;
-                storiesBeans.add(titleStoriesBean);
-                storiesBeans.addAll(bean.stories);
+                mStoriesBeans.add(titleStoriesBean);
+                mStoriesBeans.addAll(bean.stories);
 
                 isSuccess = true;
             }
@@ -82,7 +85,7 @@ public class Presenter {
 
             @Override
             public void onComplete() {
-                view.load(isSuccess);
+                mView.load(isSuccess);
             }
         });
     }
@@ -116,35 +119,35 @@ public class Presenter {
                 Gson gson = new Gson();
                 BaseBean bean = gson.fromJson(responseData, BaseBean.class);
 
-                if (Util.isEmpty(currentDate))
-                    currentDate = bean.date;//获取当前日期
+                if (Util.isEmpty(mCurrentDate))
+                    mCurrentDate = bean.date;//获取当前日期
 
                 //顶部轮播图数据更新
-                topStoriesBeans.clear();
-                topStoriesBeans.addAll(bean.topStories);
-                headerTitles.clear();
-                headerImages.clear();
-                for (TopStoriesBean topStoriesBean : topStoriesBeans) {
-                    headerImages.add(topStoriesBean.image);
-                    headerTitles.add(topStoriesBean.title);
+                mTopStoriesBeans.clear();
+                mTopStoriesBeans.addAll(bean.topStories);
+                mHeaderTitles.clear();
+                mHeaderImages.clear();
+                for (TopStoriesBean topStoriesBean : mTopStoriesBeans) {
+                    mHeaderImages.add(topStoriesBean.image);
+                    mHeaderTitles.add(topStoriesBean.title);
                 }
 
                 List<StoriesBean> lastestStoriesBeans = bean.stories;
                 //添加最新数据
-                if (storiesBeans.size() == 0) {
+                if (mStoriesBeans.size() == 0) {
                     StoriesBean titleStoriesBean = new StoriesBean();
                     titleStoriesBean.date = bean.date;
                     titleStoriesBean.isTitle = true;
-                    storiesBeans.add(titleStoriesBean);
-                    storiesBeans.addAll(lastestStoriesBeans);
+                    mStoriesBeans.add(titleStoriesBean);
+                    mStoriesBeans.addAll(lastestStoriesBeans);
                 } else {
-                    int currentLastestNumber = storiesBeans.get(1).serialNumber;
+                    int currentLastestNumber = mStoriesBeans.get(1).serialNumber;
                     for (int i = lastestStoriesBeans.size() - 1; i >= 0; i--) {
                         StoriesBean storiesBean = lastestStoriesBeans.get(i);
                         int n = storiesBean.serialNumber;
                         if (n > currentLastestNumber) {
                             storiesBean.date = bean.date;
-                            storiesBeans.add(1, storiesBean);
+                            mStoriesBeans.add(1, storiesBean);
                         }
                     }
                 }
@@ -163,16 +166,9 @@ public class Presenter {
              */
             @Override
             public void onComplete() {
-                view.load(isSuccess);
+                mView.load(isSuccess);
             }
         });
     }
 
-//    private boolean contain(int id){
-//        for (StoriesBean bean:latestStoriesBeans){
-//            if (bean==null)continue;
-//            if (id==bean.getId())return true;
-//        }
-//        return false;
-//    }
 }

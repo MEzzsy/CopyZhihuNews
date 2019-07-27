@@ -1,7 +1,7 @@
 package com.mezzsy.copyzhihunews.state;
 
 public class LoginContext {
-    UserState state = new LogoutState();
+    UserState mState = new LogoutState();
 
     //  单例模式创建LoginContext
     private LoginContext() {
@@ -12,12 +12,12 @@ public class LoginContext {
     }
 
     public UserState getState() {
-        return state;
+        return mState;
     }
 
     //设置状态
     public void setState(UserState state) {
-        this.state = state;
+        this.mState = state;
     }
 
     private static class SingletonHolder {

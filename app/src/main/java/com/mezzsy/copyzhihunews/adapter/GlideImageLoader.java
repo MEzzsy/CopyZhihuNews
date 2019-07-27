@@ -1,7 +1,6 @@
 package com.mezzsy.copyzhihunews.adapter;
 
 import android.content.Context;
-import android.util.Log;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;

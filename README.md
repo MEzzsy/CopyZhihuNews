@@ -20,11 +20,7 @@
 
 ![20180917094644](http://111.230.96.19:8081/image/20190314231948.png)
 
-中间有一大段空白，始终不知道怎么消去。在网上看[别人的代码](https://github.com/yiyibb/Zhihu)（感慨自己的代码真烂），这里涉及到一些前端的知识（有必要学习一下前端内容），就是在html代码中把css的headline取消掉。
-
-# 其他问题
-
-GitHub我commit很多次，发现并没有记录Contribution，后来发现是git用户名和邮箱没有设置的和GitHub一样
+中间有一大段空白，始终不知道怎么消去。在网上看[别人的代码](https://github.com/yiyibb/Zhihu)，这里涉及到一些前端的知识（有必要学习一下前端内容），就是在html代码中把css的headline取消掉。
 
 
 

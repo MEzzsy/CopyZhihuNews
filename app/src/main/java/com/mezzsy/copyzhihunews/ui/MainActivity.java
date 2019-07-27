@@ -43,25 +43,25 @@ public class MainActivity extends AppCompatActivity implements
     private static final String TAG = "MainActivity";
     private static final int WHAT_SUCCESS = 0;
     private static final int WHAT_FAIL = 1;
-    private Toolbar toolbar;
-    private NavigationView navigationView;
-    private DrawerLayout drawerLayout;
-    private RecyclerView recyclerView;
-    private RecyclerViewAdapter adapter;
-    private View headLayout;
-    private CircleImageView imgHeader;
+    private Toolbar mToolbar;
+    private NavigationView mNavigationView;
+    private DrawerLayout mDrawerLayout;
+    private RecyclerView mRecyclerView;
+    private RecyclerViewAdapter mAdapter;
+    private View mHeadLayout;
+    private CircleImageView mImgHeader;
     private TextView tvName;
-    private Presenter presenter;
-    private SwipeRefreshLayout swipeRefreshLayout;
+    private Presenter mPresenter;
+    private SwipeRefreshLayout mSwipeRefreshLayout;
     private TextView tvTitle;
 
-    private Handler handler = new Handler(new Handler.Callback() {
+    private Handler mHandler = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(Message msg) {
             switch (msg.what) {
                 case WHAT_SUCCESS:
-                    adapter.notifyDataSetChanged();
-                    adapter.updateBanner();
+                    mAdapter.notifyDataSetChanged();
+                    mAdapter.updateBanner();
                     break;
                 case WHAT_FAIL:
                     Toast.makeText(MainActivity.this
@@ -70,7 +70,7 @@ public class MainActivity extends AppCompatActivity implements
                 default:
                     break;
             }
-            swipeRefreshLayout.setRefreshing(false);
+            mSwipeRefreshLayout.setRefreshing(false);
             return false;
         }
     });
@@ -92,14 +92,14 @@ public class MainActivity extends AppCompatActivity implements
 
     private void initData() {
         EventBus.getDefault().register(this);
-        presenter = new Presenter(this);
+        mPresenter = new Presenter(this);
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
     public void LoginEventBus(LoginEvent event) {
         if (LoginContext.getInstance().getState() instanceof LogoutState) {
             tvName.setText("请登入");
-            Glide.with(this).load(R.mipmap.ic_launcher_round).into(imgHeader);
+            Glide.with(this).load(R.mipmap.ic_launcher_round).into(mImgHeader);
         } else {
             //TODO
         }
@@ -107,14 +107,14 @@ public class MainActivity extends AppCompatActivity implements
 
     @SuppressLint("ResourceAsColor")
     private void initView() {
-        drawerLayout = findViewById(R.id.drawer_layout);
-        swipeRefreshLayout = findViewById(R.id.swipe_fresh);
-        swipeRefreshLayout.setOnRefreshListener(this);
-        swipeRefreshLayout.setColorSchemeColors(R.color.colorPrimary);
+        mDrawerLayout = findViewById(R.id.drawer_layout);
+        mSwipeRefreshLayout = findViewById(R.id.swipe_fresh);
+        mSwipeRefreshLayout.setOnRefreshListener(this);
+        mSwipeRefreshLayout.setColorSchemeResources(R.color.colorPrimary);
 
-        toolbar = findViewById(R.id.tool_bar);
+        mToolbar = findViewById(R.id.tool_bar);
         tvTitle = findViewById(R.id.tv_title);
-        setSupportActionBar(toolbar);
+        setSupportActionBar(mToolbar);
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayShowTitleEnabled(false);
@@ -122,24 +122,24 @@ public class MainActivity extends AppCompatActivity implements
             actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
         }
 
-        navigationView = findViewById(R.id.nav_view);
-        navigationView.setCheckedItem(R.id.home);
-        navigationView.setNavigationItemSelectedListener(this);
-        headLayout = navigationView.getHeaderView(0);
-        imgHeader = headLayout.findViewById(R.id.img);
-        tvName = headLayout.findViewById(R.id.name);
+        mNavigationView = findViewById(R.id.nav_view);
+        mNavigationView.setCheckedItem(R.id.home);
+        mNavigationView.setNavigationItemSelectedListener(this);
+        mHeadLayout = mNavigationView.getHeaderView(0);
+        mImgHeader = mHeadLayout.findViewById(R.id.img);
+        tvName = mHeadLayout.findViewById(R.id.name);
 
-        recyclerView = findViewById(R.id.recycler_view);
-        adapter = new RecyclerViewAdapter();
-        adapter.setListenter(this);
-        recyclerView.setAdapter(adapter);
+        mRecyclerView = findViewById(R.id.recycler_view);
+        mAdapter = new RecyclerViewAdapter();
+        mAdapter.setListenter(this);
+        mRecyclerView.setAdapter(mAdapter);
         LinearLayoutManager manager = new LinearLayoutManager(this);
-        recyclerView.setLayoutManager(manager);
+        mRecyclerView.setLayoutManager(manager);
 
-        recyclerView.addOnScrollListener(new LoadMoreListener() {
+        mRecyclerView.addOnScrollListener(new LoadMoreListener() {
             @Override
             public void onLoadMore() {
-                presenter.loadMore();
+                mPresenter.loadMore();
             }
 
             @Override
@@ -159,7 +159,7 @@ public class MainActivity extends AppCompatActivity implements
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                drawerLayout.openDrawer(GravityCompat.START);
+                mDrawerLayout.openDrawer(GravityCompat.START);
                 break;
             case R.id.news:
                 break;
@@ -186,14 +186,14 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void load(boolean isSuccess) {
-        if (isSuccess) handler.sendEmptyMessage(WHAT_SUCCESS);
-        else handler.sendEmptyMessage(WHAT_FAIL);
+        if (isSuccess) mHandler.sendEmptyMessage(WHAT_SUCCESS);
+        else mHandler.sendEmptyMessage(WHAT_FAIL);
     }
 
     @Override
     public void onRefresh() {
-        swipeRefreshLayout.setRefreshing(true);
-        presenter.swipeRefresh();
+        mSwipeRefreshLayout.setRefreshing(true);
+        mPresenter.swipeRefresh();
     }
 
     /**

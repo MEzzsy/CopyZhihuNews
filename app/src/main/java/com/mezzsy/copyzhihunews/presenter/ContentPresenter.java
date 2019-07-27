@@ -12,11 +12,14 @@ import io.reactivex.Observer;
 import io.reactivex.disposables.Disposable;
 import okhttp3.ResponseBody;
 
+/**
+ * 具体内容页的Presenter
+ */
 public class ContentPresenter {
-    private ContentView view;
+    private ContentView mView;
 
     public ContentPresenter(ContentView view) {
-        this.view = view;
+        this.mView = view;
     }
 
     public void requestNewsContent(int id) {
@@ -49,7 +52,7 @@ public class ContentPresenter {
 
             @Override
             public void onComplete() {
-                view.load(bean);
+                mView.load(bean);
             }
         });
     }
@@ -84,7 +87,7 @@ public class ContentPresenter {
 
             @Override
             public void onComplete() {
-                view.extra(bean);
+                mView.extra(bean);
             }
         });
     }

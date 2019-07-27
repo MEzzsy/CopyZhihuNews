@@ -4,9 +4,9 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <com.youth.banner.Banner
+    <com.mezzsy.copyzhihunews.view.HeadlineBanner
         android:id="@+id/banner"
         android:layout_width="match_parent"
-        android:layout_height="260dp" />
+        android:layout_height="230dp" />
 
 </LinearLayout>
