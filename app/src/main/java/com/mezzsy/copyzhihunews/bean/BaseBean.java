@@ -26,6 +26,6 @@ public class BaseBean {
     public String date;
     public List<StoriesBean> stories;
     @SerializedName("top_stories")
-    public List<TopStoriesBean> topStories;
+    public List<StoriesBean> topStories;
 
 }

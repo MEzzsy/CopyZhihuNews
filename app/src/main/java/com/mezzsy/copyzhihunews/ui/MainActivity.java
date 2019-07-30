@@ -85,8 +85,8 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
+    protected void onStart() {
+        super.onStart();
         onRefresh();
     }
 
@@ -198,12 +198,15 @@ public class MainActivity extends AppCompatActivity implements
 
     /**
      * 处理RecyclerView子项点击事件
+     *
      * @param id
      */
     @Override
-    public void click(int id) {
+    public void click(int id, boolean isTopStory, int postition) {
         Intent intent = new Intent(this, NewsActivity.class);
         intent.putExtra("id", id);
+        intent.putExtra("isTopStory", isTopStory);
+        intent.putExtra("postition", postition);
         startActivity(intent);
     }
 }

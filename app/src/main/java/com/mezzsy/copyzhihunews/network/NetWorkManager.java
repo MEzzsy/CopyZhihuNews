@@ -43,6 +43,11 @@ public class NetWorkManager {
                 .subscribe(observer);
     }
 
+    /**
+     * 获取指定日期的内容
+     * @param date 指定日期的前一天，比如想获取1月2日的内容，需要传入1月1日的日期
+     * @param observer
+     */
     public void loadMore(String date, Observer<ResponseBody> observer) {
         sService.getBefore(date)
                 .subscribeOn(Schedulers.io())

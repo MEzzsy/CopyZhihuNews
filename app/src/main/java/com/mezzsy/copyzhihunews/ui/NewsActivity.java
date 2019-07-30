@@ -1,40 +1,35 @@
 package com.mezzsy.copyzhihunews.ui;
 
-import android.annotation.SuppressLint;
-import android.content.Intent;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import android.support.design.widget.AppBarLayout;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
-import android.webkit.WebView;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.target.SimpleTarget;
-import com.bumptech.glide.request.transition.Transition;
 import com.mezzsy.copyzhihunews.R;
-import com.mezzsy.copyzhihunews.bean.ContentBean;
+import com.mezzsy.copyzhihunews.adapter.ContentViewPagerAdapter;
 import com.mezzsy.copyzhihunews.bean.ExtraBean;
-import com.mezzsy.copyzhihunews.presenter.ContentPresenter;
-import com.mezzsy.copyzhihunews.util.HtmlUtil;
-import com.mezzsy.copyzhihunews.util.WebViewConfigs;
-import com.mezzsy.copyzhihunews.view.ContentView;
+import com.mezzsy.copyzhihunews.bean.StoriesBean;
+import com.mezzsy.copyzhihunews.model.Model;
 
-public class NewsActivity extends AppCompatActivity implements
-        ContentView, View.OnClickListener {
+import java.util.List;
+
+public class NewsActivity extends AppCompatActivity implements View.OnClickListener {
     private static final String TAG = "NewsActivityzzsy";
-    private WebView mWebView;
-    private ContentPresenter mPresenter;
 
-    private int id;//新闻的id，用于获取具体内容
-    private String mTitle;
+    private ViewPager mViewPager;
+    private ContentViewPagerAdapter mAdapter;
 
+    private int mId;//新闻的id，用于获取具体内容
+    private boolean isTopStory = false;//是否点击了头条日报
+    private int mPostition;
+
+    private AppBarLayout mAppBarLayout;
     private Toolbar mToolbar;
     private ImageView imgBack;
     private ImageView imgShare;
@@ -44,10 +39,6 @@ public class NewsActivity extends AppCompatActivity implements
     private ImageView imgDz;
     private TextView tvDz;
 
-    private RelativeLayout mBackground;
-    private TextView tvTitle;
-    private TextView tvSource;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,25 +47,13 @@ public class NewsActivity extends AppCompatActivity implements
         initView();
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        mPresenter.requestNewsContent(id);
-        mPresenter.requestNewsExtra(id);
-    }
-
     private void initData() {
-        id = getIntent().getIntExtra("id", 0);
-        mPresenter = new ContentPresenter(this);
+        mId = getIntent().getIntExtra("id", 0);
+        isTopStory = getIntent().getBooleanExtra("isTopStory", false);
     }
 
     private void initView() {
-        mWebView = findViewById(R.id.web_view);
-
-        mBackground = findViewById(R.id.header_layout);
-        tvTitle = findViewById(R.id.tv_title);
-        tvSource = findViewById(R.id.tv_source);
-
+        mAppBarLayout = findViewById(R.id.app_bar_layout);
         mToolbar = findViewById(R.id.tool_bar);
         setSupportActionBar(mToolbar);
         imgBack = findViewById(R.id.img_back);
@@ -91,33 +70,50 @@ public class NewsActivity extends AppCompatActivity implements
         tvPl.setOnClickListener(this);
         imgDz.setOnClickListener(this);
         tvDz.setOnClickListener(this);
-    }
 
-    @Override
-    public void load(ContentBean bean) {
-        WebViewConfigs.initWebView(mWebView);
-//        String html = Util.modifyHTML(bean.getBody(), bean.getCss().get(0));
-        String htmlData = HtmlUtil.createHtmlData(bean.getBody(),
-                bean.getCss(), bean.getJs());
-//        Log.d(TAG, html);
-        mWebView.loadData(htmlData, "text/html; charset=UTF-8", null);
-
-        Glide.with(this).load(bean.getImage()).into(new SimpleTarget<Drawable>() {
-            @Override
-            public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
-                mBackground.setBackground(resource);
+        mViewPager = findViewById(R.id.content_view_pager);
+        Log.d(TAG, "initView: " + isTopStory);
+        List<StoriesBean> list;
+        if (isTopStory)
+            list = Model.getInstance().getTopStoriesBeans();
+        else
+            list = Model.getInstance().getStoriesBeansWithoutDate();
+        mAdapter = new ContentViewPagerAdapter(getSupportFragmentManager(), list);
+        mViewPager.setAdapter(mAdapter);
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).id == mId) {
+                mPostition = i;
+                break;
             }
-        });
-        tvSource.setText(bean.getImage_source());
-        tvTitle.setText(bean.getTitle());
-        mTitle = bean.getTitle();
+        }
+        mViewPager.setCurrentItem(mPostition);
     }
 
-    @SuppressLint("SetTextI18n")
-    @Override
-    public void extra(ExtraBean bean) {
-        tvPl.setText(bean.getComments() + "");
-        tvDz.setText(bean.getPopularity() + "");
+    /**
+     * 改变ToolBar上的点赞和评论个数，在Fragment中调用
+     *
+     * @param bean
+     */
+    public void setToolbarData(ExtraBean bean) {
+        tvPl.setText(String.valueOf(bean.getComments()));
+        tvDz.setText(String.valueOf(bean.getPopularity()));
+    }
+
+    public void setToolbarAlpha(float f) {
+        float currentAlpha = mAppBarLayout.getAlpha();
+        currentAlpha += f;
+        if (currentAlpha <= 0f) {
+            currentAlpha = 0f;
+            mAppBarLayout.setVisibility(View.GONE);
+        } else {
+            if (currentAlpha >= 1f) {
+                currentAlpha = 1f;
+            }
+            mAppBarLayout.setVisibility(View.VISIBLE);
+        }
+        Log.d(TAG, "setToolbarAlpha: " + currentAlpha);
+
+        mAppBarLayout.setAlpha(currentAlpha);
     }
 
     @Override
@@ -146,13 +142,13 @@ public class NewsActivity extends AppCompatActivity implements
     }
 
     private void share() {
-        String url = " http://daily.zhihu.com/story/" + id;
-        Intent intent = new Intent();
-        intent.setType("text/plain");
-        intent.setAction(Intent.ACTION_SEND);
-        intent.putExtra(Intent.EXTRA_TEXT, mTitle + " (分享自 @仿知乎日报 App) " + url);
-//        intent.putExtra(Intent.EXTRA_HTML_TEXT, Html.fromHtml("<p>Hello,zzsy!!!</p>"));
-//        intent.putExtra(Intent.EXTRA_TEXT, Html.fromHtml(mBody));
-        startActivity(Intent.createChooser(intent, "分享"));
+//        String url = " http://daily.zhihu.com/story/" + id;
+//        Intent intent = new Intent();
+//        intent.setType("text/plain");
+//        intent.setAction(Intent.ACTION_SEND);
+//        intent.putExtra(Intent.EXTRA_TEXT, mTitle + " (分享自 @仿知乎日报 App) " + url);
+////        intent.putExtra(Intent.EXTRA_HTML_TEXT, Html.fromHtml("<p>Hello,zzsy!!!</p>"));
+////        intent.putExtra(Intent.EXTRA_TEXT, Html.fromHtml(mBody));
+//        startActivity(Intent.createChooser(intent, "分享"));
     }
 }

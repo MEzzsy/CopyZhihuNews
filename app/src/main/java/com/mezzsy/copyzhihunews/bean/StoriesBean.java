@@ -6,7 +6,7 @@ import java.util.List;
 
 /**
  * 非Top新闻的数据类
- *
+ * <p>
  * RecyclerViewAdapter中的TYPE_TITLE和TYPE_ITEM类型，TYPE_TITLE为日期标题，TYPE_ITEM为新闻。
  * 在List中的存放顺序：最新的StoriesBean的index越小，并且以isTitle进行区分是否是日期标题。
  */
@@ -24,10 +24,22 @@ public class StoriesBean {
      */
 
     public String date;
-    public boolean isTitle;//是否是标题日期，如果是，除date属性外其余为默认值。
+    public boolean isDateTitle;//是否是标题日期，如果是，除date属性外其余为默认值。
     public int id;
     public String title;
+    /**
+     * 普通Story的image
+     */
+    @SerializedName("images")
     public List<String> images;
+    /**
+     * TopStory的image
+     */
+    @SerializedName("image")
+    public String image;
+    /**
+     * 添加的顺序，用于排序
+     */
     @SerializedName("ga_prefix")
-    public int serialNumber;
+    public int gaPrefix;
 }

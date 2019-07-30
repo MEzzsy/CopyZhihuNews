@@ -66,7 +66,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     @Override
     public int getItemViewType(int position) {
         if (position == 0) return TYPE_HEADER;
-        if (mStoriesBeans.get(position - 1).isTitle) return TYPE_TITLE;
+        if (mStoriesBeans.get(position - 1).isDateTitle) return TYPE_TITLE;
         return TYPE_ITEM;
     }
 
@@ -82,17 +82,11 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             ((ItemHolder) holder).tv.setText(storiesBean.title);
             ImageView img = ((ItemHolder) holder).img;
             Glide.with(img).load(mStoriesBeans.get(position - 1).images.get(0)).into(img);
-            ((ItemHolder) holder).layout.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mListenter.click(storiesBean.id);
-                }
-            });
+            ((ItemHolder) holder).layout.setOnClickListener(v
+                    -> mListenter.click(storiesBean.id, false, position));
         } else if (holder instanceof TitleHolder) {
             String date = mStoriesBeans.get(position - 1).date;
             ((TitleHolder) holder).tvTitle.setText(DateHelper.getDate(date));
-        } else {
-            //TODO
         }
     }
 
@@ -103,7 +97,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 .setOnBannerListener(position -> {
 //                        Log.d(TAG, "OnBannerClick: position = " + position);
                     int id = Model.getInstance().getTopStoriesBeans().get(position).id;
-                    mListenter.click(id);
+                    mListenter.click(id, true, position);
                 })
                 .bulid()
                 .start();
@@ -116,7 +110,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     }
 
     public interface OnItemClickListenter {
-        void click(int id);
+        void click(int id, boolean isTopStory, int postition);
     }
 
     private class HeaderHolder extends RecyclerView.ViewHolder {

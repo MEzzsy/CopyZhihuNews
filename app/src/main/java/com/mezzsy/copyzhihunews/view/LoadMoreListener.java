@@ -49,7 +49,7 @@ public abstract class LoadMoreListener extends RecyclerView.OnScrollListener {
         if (firstItemPosition == 0) setTitle("首页");
         else {
             StoriesBean storiesBean = Model.getInstance().getStoriesBeans().get(firstItemPosition - 1);
-            if (storiesBean.isTitle) {
+            if (storiesBean.isDateTitle) {
                 setTitle(DateHelper.getDate(storiesBean.date));
             }
         }
