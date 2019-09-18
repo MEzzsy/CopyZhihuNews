@@ -82,6 +82,7 @@ public class ContentFragment extends Fragment implements ContentView {
         tvTitle = mView.findViewById(R.id.tv_title);
         tvSource = mView.findViewById(R.id.tv_source);
 
+        //TODO 待添加ToolBar随滑动透明度改变
 //        mWebView.setOnTouchListener(new View.OnTouchListener() {
 //            float mStart;
 //            final float DISTANCE = 30f;
