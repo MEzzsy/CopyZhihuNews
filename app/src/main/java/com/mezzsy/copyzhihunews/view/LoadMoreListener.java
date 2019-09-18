@@ -2,6 +2,7 @@ package com.mezzsy.copyzhihunews.view;
 
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 
 import com.mezzsy.copyzhihunews.bean.StoriesBean;
 import com.mezzsy.copyzhihunews.model.Model;
@@ -27,22 +28,24 @@ public abstract class LoadMoreListener extends RecyclerView.OnScrollListener {
             // 获取最后一个完全显示的itemPosition
             int lastItemPosition = manager.findLastCompletelyVisibleItemPosition();
             int itemCount = manager.getItemCount();
+            Log.d(TAG, "lastItemPosition=" + lastItemPosition);
+            Log.d(TAG, "itemCount=" + itemCount);
 
             // 判断是否滑动到了最后一个item，并且是向上滑动
-            if (lastItemPosition == (itemCount - 1) && isSlidingUpward) {
+            if (lastItemPosition == (itemCount - 1)) {
                 // 加载更多
                 onLoadMore();
             }
         }
-
 
     }
 
     @Override
     public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
         super.onScrolled(recyclerView, dx, dy);
+        Log.d(TAG, "onScrolled: dy=" + dy);
         // 大于0表示正在向上滑动，小于等于0表示停止或向下滑动
-        isSlidingUpward = dy > 0;
+//        isSlidingUpward = dy > 0;
         LinearLayoutManager manager = (LinearLayoutManager) recyclerView.getLayoutManager();
         int firstItemPosition = manager.findFirstVisibleItemPosition();
 //        Log.d(TAG, "onScrollStateChanged: firstItemPosition = " + firstItemPosition);

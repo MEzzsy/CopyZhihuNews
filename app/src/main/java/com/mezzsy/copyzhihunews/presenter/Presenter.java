@@ -125,6 +125,11 @@ public class Presenter {
 //                if (Util.isEmpty(mCurrentDate))
 //                mCurrentDate = bean.date;//获取当前日期
 
+                //TODO
+                for (int i = 0; i < bean.stories.size() - 1; i++) {
+                    bean.stories.remove(i);
+                }
+
                 //头条日报数据更新
                 List<StoriesBean> topStories = bean.topStories;
                 getModel().updateTopStoriesBean(topStories);
